@@ -29,21 +29,31 @@ class mine(Fl_Window):
 		for x in range(10):
 			a = random.randint(0,99)
 			self.bombs.append(self.cords[a])
-			self.bl[a].image(self.minepic)
+			self.bl[a].label('bomb')
 			self.redraw()
 		
 	def numbered_tiles(self):
 		bombs = 0
 		print(self.cords)
 		for x in range(len(self.cords)):
-			if self.bl[x] in self.bombs:
-				continue
-	
-			
-							
-					
-			
-			
+			bombs = 0
+			if self.cords[x] in self.bombs:
+				continue 
+						#         above the button              1 left above the button                  1 right above the button                 left to the button
+			around = [[self.cords[x][0]+1,self.cords[x][1]],[self.cords[x][0]+1,self.cords[x][1]-1],[self.cords[x][0]+1,self.cords[x][1]+1],[self.cords[x][0],self.cords[x][1]-1]
+			      # right to the button                    below the button                     1 left below the button                  1 right below the button
+			,[self.cords[x][0],self.cords[x][1]+1],[self.cords[x][0]-1,self.cords[x][1]],[self.cords[x][0]-1,self.cords[x][1]-1],[self.cords[x][0]-1,self.cords[x][0]+1]]
+
+			for surrounding in around:
+				if surrounding in self.bombs:
+					bombs += 1
+			print('around -------------------')	
+			print(around)
+			print('around -------------------')
+
+			print('bombs -----------------')
+			print(self.bombs)
+			print('bombs -----------------')
 			self.numbered[x] = bombs
 		
 		print(self.numbered)
