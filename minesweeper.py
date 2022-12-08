@@ -29,7 +29,7 @@ class mine(Fl_Window):
 		for x in range(10):
 			a = random.randint(0,99)
 			self.bombs.append(self.cords[a])
-			self.bl[a].label('bomb')
+			self.bl[a].image(self.minepic)
 			self.redraw()
 		
 	def numbered_tiles(self):
@@ -59,9 +59,9 @@ class mine(Fl_Window):
 			print(self.bombs)
 			print('bombs -----------------')
 			'''
-			
-			for x in range(len(around)):
-				if around[x] in self.bombs:
+
+			for y in range(len(around)):
+				if around[y] in self.bombs:
 					bombs += 1
 			
 			self.numbered[x] = bombs
@@ -78,38 +78,38 @@ class mine(Fl_Window):
 		for row in range(-1,2):
 			for col in range(-1,2):
 				current_displacement = [position[0]+row,position[1]+col]
-				if 0<= current_displacement[0] <= 99 and 0<= current_displacement[1] <= 99:
-					around.append(current_displacement)
+				around.append(current_displacement)
 				
 		return around
 							
 		
 	
 	def button_click(self,wid):
+		print(self.numbered)
 		if wid in self.bombs:
 			fl_message('you lose')
 		else:
-			if self.numbered.get(wid) != 0:
-				if self.numbered.get(self.bl.index(wid)) == 0:
-					self.check_around_caller(self.cords[self.bl.index(wid)],self.cords[self.bl.index(wid)])
-				else:
-					wid.label(str(self.numbered.get(self.bl.index(wid))))
-					wid.deactivate()
-	
+			if self.numbered.get(self.bl.index(wid)) != 0:
+				wid.label(str(self.numbered.get(self.bl.index(wid))))
+				wid.deactivate()
+			else:
+				self.check_around_caller(self.cords[self.bl.index(wid)])
+					
 	def uncover_tiles(self,tiles):
 		if len(tiles) > 0:
 			for x in range(len(tiles)):
-				self.bl[self.cords.index(tiles[x])].label('0')
-				self.bl[self.cords.index(tiles[x])].deactivate()
-		win.redraw()
+				self.bl[x].label('0')
+				self.bl[x].deactivate()
+		self.redraw()
 		print(tiles)
 		
 	def check_around_caller(self,total, positions = None):
 		
 		around = self.find_tiles_around(total)
-		
-		if len(total) >= 0:
+		print(around)
+		if len(total) == 0:
 			self.uncover_tiles(total)
+			return None
 			#self.uncover_tiles(total)
 		for x in around:
 			self.check_around(x)
@@ -119,7 +119,6 @@ class mine(Fl_Window):
 	def check_around(self,positions):
 		found = []
 		for x in range(len(positions)):
-			
 			if self.numbered.get(self.cords.index(positions[x])) == 0:
 				found.append(positions[x])
 		print(found)
