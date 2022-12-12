@@ -12,6 +12,9 @@ class mine(Fl_Window):
 		self.flag = Fl_PNG_Image('flag.png').copy(50,50)
 		self.minepic=Fl_JPEG_Image('bomb.jpg').copy(50,50)
 		num = 0
+		self.revealed = []
+		self.flagged = []
+		self.opened = []
 		for row in range(10):
 			for col in range(10):
 				self.bl.append(Fl_Button(col*50+50,row*50+50,50,50))
@@ -19,7 +22,7 @@ class mine(Fl_Window):
 				num += 1
 				self.cords.append([row,col])
 		
-		Fl.scheme('gtk+')
+		Fl.scheme('plastic')
 		self.resizable(self)
 		self.end()
 		self.randomize_bombs()
@@ -28,8 +31,11 @@ class mine(Fl_Window):
 	def randomize_bombs(self):
 		for x in range(10):
 			a = random.randint(0,99)
+			if self.cords[a] in self.bombs:
+				a = random.randint(0,99)
+				
 			self.bombs.append(self.cords[a])
-			self.bl[a].image(self.minepic)
+			
 			self.redraw()
 		
 	def numbered_tiles(self):
@@ -77,52 +83,101 @@ class mine(Fl_Window):
 		'''
 		for row in range(-1,2):
 			for col in range(-1,2):
-				current_displacement = [position[0]+row,position[1]+col]
-				around.append(current_displacement)
+				if position[0] != 0 or position[0] != 9:
+					if position[1] != 0 or position[1] != 9:
+						current_displacement = [position[0]+row,position[1]+col]
+						around.append(current_displacement)
 				
 		return around
 							
 		
 	
-	def button_click(self,wid):
-		print(self.numbered)
-		if wid in self.bombs:
-			fl_message('you lose')
-		else:
-			if self.numbered.get(self.bl.index(wid)) != 0:
-				wid.label(str(self.numbered.get(self.bl.index(wid))))
-				wid.deactivate()
+	def button_click(self,wid): 
+		if Fl.event_button() == FL_LEFT_MOUSE:
+			if self.cords[self.bl.index(wid)] in self.flagged:
+				return None
 			else:
-				self.check_around_caller(self.cords[self.bl.index(wid)])
-					
+				if self.cords[self.bl.index(wid)] in self.bombs:
+					fl_message('you lose')
+					for x in self.bombs:
+						self.bl[self.cords.index(x)].image(self.minepic)
+				else:
+					if self.numbered.get(self.bl.index(wid)) != 0:
+						self.uncover_tiles(self.cords[self.bl.index(wid)])
+						wid.deactivate()
+						if len(self.opened) == 90:
+							if len(self.flagged) == 10:
+								fl_message('you win')
+					else:
+						self.check_around_caller([self.cords[self.bl.index(wid)]])
+						
+	
+		elif Fl.event_button() == FL_RIGHT_MOUSE:
+			if self.cords[self.bl.index(wid)] in self.flagged:
+				self.flagged.remove(self.cords[self.bl.index(wid)])
+				wid.image(None)
+				return None
+			
+			self.flagged.append(self.cords[self.bl.index(wid)])
+			print(len(self.opened))
+			self.bl[self.cords.index(self.flagged[-1])].image(self.flag)
+			if len(self.opened) == 90:
+						if len(self.flagged) == 10:
+							fl_message('you win')
+			
+			
+			
 	def uncover_tiles(self,tiles):
-		if len(tiles) > 0:
-			for x in range(len(tiles)):
-				self.bl[x].label('0')
-				self.bl[x].deactivate()
-		self.redraw()
-		print(tiles)
+		if len(tiles) <= 0:
+			return None
+		refer = self.bl[self.cords.index(tiles)]
+		dict_value = self.numbered.get(self.cords.index(tiles))
+		
+		if dict_value == 0:
+			refer.color(0)
+		elif dict_value == 1:
+			refer.color(FL_BLUE)
+		elif dict_value == 2:
+			refer.color(FL_GREEN)
+		elif dict_value == None:
+			return None
+			
+		else:
+			refer.color(FL_YELLOW)
+		
+		refer.label(str(dict_value))
+			
+		refer.deactivate()
+		refer.redraw()
+		if tiles not in self.opened:
+			self.opened.append(tiles)
+		print(self.opened)
 		
 	def check_around_caller(self,total, positions = None):
-		
-		around = self.find_tiles_around(total)
-		print(around)
+		print(total)
 		if len(total) == 0:
-			self.uncover_tiles(total)
 			return None
 			#self.uncover_tiles(total)
-		for x in around:
+		for x in total:
+			print('total')
+			print(x)
+			self.uncover_tiles(x)
 			self.check_around(x)
 		
 		
 	
-	def check_around(self,positions):
+	def check_around(self,position):
+		
 		found = []
-		for x in range(len(positions)):
-			if self.numbered.get(self.cords.index(positions[x])) == 0:
-				found.append(positions[x])
+		suspect = self.find_tiles_around(position)
+		for x in range(len(suspect)):
+			if (suspect[x][0] != -1 and suspect[x][0] != 10) and (suspect[x][1] != -1 and suspect[x][1] != 10):
+				
+				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) == 0:
+					found.append(suspect[x])
+					self.revealed.append(suspect[x])
 		print(found)
-		return found
+		self.check_around_caller(found)
 		
 				
 app = mine(500,500,600,700,'game')
