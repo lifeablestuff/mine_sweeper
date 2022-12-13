@@ -188,7 +188,7 @@ class mine(Fl_Window):
 				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) == 0:
 					found.append(suspect[x])
 					self.revealed.append(suspect[x])
-				elif suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) != None:
+				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) is not None:
 					found.append(suspect[x])
 					self.revealed.append(suspect[x])
 		
