@@ -33,9 +33,8 @@ class mine(Fl_Window):
 			a = random.randint(0,99)
 			if self.cords[a] in self.bombs:
 				a = random.randint(0,99)
-				
+			#self.bl[a].image(self.minepic)
 			self.bombs.append(self.cords[a])
-			
 			self.redraw()
 		
 	def numbered_tiles(self):
@@ -98,9 +97,21 @@ class mine(Fl_Window):
 				return None
 			else:
 				if self.cords[self.bl.index(wid)] in self.bombs:
-					fl_message('you lose')
+					
+					
 					for x in self.bombs:
 						self.bl[self.cords.index(x)].image(self.minepic)
+						self.redraw()
+					
+					for x in self.flagged:
+						if x not in self.bombs:
+							self.bl[self.cords.index(x)].label('x')
+							self.bl[self.cords.index(x)].labelcolor(FL_RED)
+							self.bl[self.cords.index(x)].image(None)
+						else:
+							self.bl[self.cords.index(x)].image(self.flag)
+					self.redraw()
+					fl_message('you lose')
 				else:
 					if self.numbered.get(self.bl.index(wid)) != 0:
 						self.uncover_tiles(self.cords[self.bl.index(wid)])
@@ -161,8 +172,9 @@ class mine(Fl_Window):
 		for x in total:
 			print('total')
 			print(x)
+			if self.numbered.get(self.cords.index(x)) == 0:
+				self.check_around(x)
 			self.uncover_tiles(x)
-			self.check_around(x)
 		
 		
 	
@@ -176,6 +188,10 @@ class mine(Fl_Window):
 				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) == 0:
 					found.append(suspect[x])
 					self.revealed.append(suspect[x])
+				elif suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) != None:
+					found.append(suspect[x])
+					self.revealed.append(suspect[x])
+		
 		print(found)
 		self.check_around_caller(found)
 		
