@@ -29,57 +29,35 @@ class mine(Fl_Window):
 		self.numbered_tiles()
 	
 	def randomize_bombs(self):
+		# randomizing the bomb locations
 		for x in range(10):
 			a = random.randint(0,99)
 			if self.cords[a] in self.bombs:
 				a = random.randint(0,99)
-			#self.bl[a].image(self.minepic)
 			self.bombs.append(self.cords[a])
 			self.redraw()
 		
 	def numbered_tiles(self):
+		# assigns the number of bombs around tile to the tile in a dictionary
 		bombs = 0
-		print(self.cords)
 		for x in range(len(self.cords)):
 			bombs = 0
 			if self.cords[x] in self.bombs:
 				continue 
 				
 			around = self.find_tiles_around(self.cords[x])
-			'''
-						#         above the button              1 left above the button                  1 right above the button                 left to the button
-			around = [[self.cords[x][0]+1,self.cords[x][1]],[self.cords[x][0]+1,self.cords[x][1]-1],[self.cords[x][0]+1,self.cords[x][1]+1],[self.cords[x][0],self.cords[x][1]-1]
-			      # right to the button                    below the button                     1 left below the button                  1 right below the button
-			,[self.cords[x][0],self.cords[x][1]+1],[self.cords[x][0]-1,self.cords[x][1]],[self.cords[x][0]-1,self.cords[x][1]-1],[self.cords[x][0]-1,self.cords[x][1]+1]]
-			
-			
-			for surrounding in around:
-				if surrounding in self.bombs:
-					bombs += 1
-			print('around -------------------')	
-			print(around)
-			print('around -------------------')
 
-			print('bombs -----------------')
-			print(self.bombs)
-			print('bombs -----------------')
-			'''
 
 			for y in range(len(around)):
 				if around[y] in self.bombs:
 					bombs += 1
 			
 			self.numbered[x] = bombs
-		
-		print(self.numbered)
+
 	
 	def find_tiles_around(self,position):
 		around = []
-		'''
-		around = [[self.cords[position][0]+1,self.cords[position][1]],[self.cords[position][0]+1,self.cords[position][1]-1],[self.cords[position][0]+1,self.cords[position][1]+1],[self.cords[position][0],self.cords[position][1]-1]
-			      # right to the button                    below the button                     1 left below the button                  1 right below the button
-		,[self.cords[position][0],self.cords[position][1]+1],[self.cords[position][0]-1,self.cords[position][1]],[self.cords[x][0]-1,self.cords[position][1]-1],[self.cords[position][0]-1,self.cords[position][1]+1]]
-		'''
+		# returns all cordinates around a given cordinate
 		for row in range(-1,2):
 			for col in range(-1,2):
 				if position[0] != 0 or position[0] != 9:
@@ -92,6 +70,7 @@ class mine(Fl_Window):
 		
 	
 	def button_click(self,wid): 
+		# reveal event
 		if Fl.event_button() == FL_LEFT_MOUSE:
 			if self.cords[self.bl.index(wid)] in self.flagged:
 				return None
@@ -115,14 +94,16 @@ class mine(Fl_Window):
 				else:
 					if self.numbered.get(self.bl.index(wid)) != 0:
 						self.uncover_tiles(self.cords[self.bl.index(wid)])
+						# prevent clicking already revealed tile
 						wid.deactivate()
+						# checking if correct amount of tiles revealed and correct amount of flags placed down.
 						if len(self.opened) == 90:
 							if len(self.flagged) == 10:
 								fl_message('you win')
-					else:
+					else:# if clicked on a empty tile
 						self.check_around_caller([self.cords[self.bl.index(wid)]])
 						
-	
+		# flag event
 		elif Fl.event_button() == FL_RIGHT_MOUSE:
 			if self.cords[self.bl.index(wid)] in self.flagged:
 				self.flagged.remove(self.cords[self.bl.index(wid)])
@@ -130,7 +111,7 @@ class mine(Fl_Window):
 				return None
 			
 			self.flagged.append(self.cords[self.bl.index(wid)])
-			print(len(self.opened))
+
 			self.bl[self.cords.index(self.flagged[-1])].image(self.flag)
 			if len(self.opened) == 90:
 						if len(self.flagged) == 10:
@@ -141,6 +122,7 @@ class mine(Fl_Window):
 	def uncover_tiles(self,tiles):
 		if len(tiles) <= 0:
 			return None
+		# quick referance by variable
 		refer = self.bl[self.cords.index(tiles)]
 		dict_value = self.numbered.get(self.cords.index(tiles))
 		
@@ -160,18 +142,16 @@ class mine(Fl_Window):
 			
 		refer.deactivate()
 		refer.redraw()
+		# adding cleared tiles to list of opened tiles
 		if tiles not in self.opened:
 			self.opened.append(tiles)
-		print(self.opened)
+
 		
 	def check_around_caller(self,total, positions = None):
-		print(total)
 		if len(total) == 0:
 			return None
-			#self.uncover_tiles(total)
 		for x in total:
-			print('total')
-			print(x)
+			# if tile is empty
 			if self.numbered.get(self.cords.index(x)) == 0:
 				self.check_around(x)
 			self.uncover_tiles(x)
@@ -183,13 +163,13 @@ class mine(Fl_Window):
 		found = []
 		suspect = self.find_tiles_around(position)
 		for x in range(len(suspect)):
+			# checking if tile cordinates are within boundaries
 			if (suspect[x][0] != -1 and suspect[x][0] != 10) and (suspect[x][1] != -1 and suspect[x][1] != 10):
 				
-				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) is not None:
+				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) != None:
 					found.append(suspect[x])
 					self.revealed.append(suspect[x])
 		
-		print(found)
 		self.check_around_caller(found)
 		
 				
