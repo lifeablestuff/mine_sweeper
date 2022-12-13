@@ -185,9 +185,6 @@ class mine(Fl_Window):
 		for x in range(len(suspect)):
 			if (suspect[x][0] != -1 and suspect[x][0] != 10) and (suspect[x][1] != -1 and suspect[x][1] != 10):
 				
-				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) == 0:
-					found.append(suspect[x])
-					self.revealed.append(suspect[x])
 				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) is not None:
 					found.append(suspect[x])
 					self.revealed.append(suspect[x])
