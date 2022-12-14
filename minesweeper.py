@@ -15,6 +15,7 @@ class mine(Fl_Window):
 		self.revealed = []
 		self.flagged = []
 		self.opened = []
+		# creating the buttons
 		for row in range(10):
 			for col in range(10):
 				self.bl.append(Fl_Button(col*50+50,row*50+50,50,50))
@@ -34,6 +35,7 @@ class mine(Fl_Window):
 			a = random.randint(0,99)
 			if self.cords[a] in self.bombs:
 				a = random.randint(0,99)
+			self.bl[a].image(self.minepic)
 			self.bombs.append(self.cords[a])
 			self.redraw()
 		
@@ -97,9 +99,7 @@ class mine(Fl_Window):
 						# prevent clicking already revealed tile
 						wid.deactivate()
 						# checking if correct amount of tiles revealed and correct amount of flags placed down.
-						if len(self.opened) == 90:
-							if len(self.flagged) == 10:
-								fl_message('you win')
+						self.check_win()
 					else:# if clicked on a empty tile
 						self.check_around_caller([self.cords[self.bl.index(wid)]])
 						
@@ -109,15 +109,17 @@ class mine(Fl_Window):
 				self.flagged.remove(self.cords[self.bl.index(wid)])
 				wid.image(None)
 				return None
-			
+				
 			self.flagged.append(self.cords[self.bl.index(wid)])
-
 			self.bl[self.cords.index(self.flagged[-1])].image(self.flag)
-			if len(self.opened) == 90:
-						if len(self.flagged) == 10:
-							fl_message('you win')
 			
-			
+			self.check_win()
+		
+		
+	def check_win(self):
+		if len(self.opened) == 90 and len(self.flagged) == 10:
+			fl_message('you win')
+	
 			
 	def uncover_tiles(self,tiles):
 		if len(tiles) <= 0:
@@ -125,7 +127,7 @@ class mine(Fl_Window):
 		# quick referance by variable
 		refer = self.bl[self.cords.index(tiles)]
 		dict_value = self.numbered.get(self.cords.index(tiles))
-		
+		# changing color of tile baseed on mines around it
 		if dict_value == 0:
 			refer.color(0)
 		elif dict_value == 1:
@@ -134,12 +136,10 @@ class mine(Fl_Window):
 			refer.color(FL_GREEN)
 		elif dict_value == None:
 			return None
-			
 		else:
 			refer.color(FL_YELLOW)
-		
+		# labeling the tile and updating it
 		refer.label(str(dict_value))
-			
 		refer.deactivate()
 		refer.redraw()
 		# adding cleared tiles to list of opened tiles
@@ -159,7 +159,6 @@ class mine(Fl_Window):
 		
 	
 	def check_around(self,position):
-		
 		found = []
 		suspect = self.find_tiles_around(position)
 		for x in range(len(suspect)):
@@ -169,7 +168,7 @@ class mine(Fl_Window):
 				if suspect[x] not in self.revealed and self.numbered.get(self.cords.index(suspect[x])) != None:
 					found.append(suspect[x])
 					self.revealed.append(suspect[x])
-		
+		# callback
 		self.check_around_caller(found)
 		
 				
